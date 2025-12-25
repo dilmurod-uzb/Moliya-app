@@ -3,107 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Finance AI</title>
+    <title>AI Business Mentor</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 15px; }
-        h2 { color: #1c1e21; font-size: 18px; margin-top: 0; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 12px; color: #65676b; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .res-box { padding: 10px; border-radius: 8px; text-align: center; color: white; }
-        .bg-green { background: #2ecc71; }
-        .bg-red { background: #e74c3c; }
-        .bg-blue { background: #3498db; }
-        .ai-advice { background: #fff3cd; border-left: 5px solid #ffca28; padding: 10px; font-size: 14px; margin-top: 15px; border-radius: 4px; }
+        :root { --tg-theme-bg-color: #f4f7f9; --primary: #0088cc; --warn: #ff9800; --danger: #f44336; --success: #4caf50; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--tg-theme-bg-color); margin: 0; padding: 15px; }
+        .card { background: white; border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        h3 { margin-top: 0; font-size: 14px; color: #888; text-transform: uppercase; }
+        .input-box { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; margin-bottom: 4px; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        .ai-box { background: #e3f2fd; border-radius: 12px; padding: 15px; border-left: 5px solid var(--primary); }
+        .legal-warn { background: #fff3e0; border-left: 5px solid var(--warn); color: #e65100; padding: 10px; font-size: 13px; margin-top: 10px; display: none; }
+        .profit-text { font-size: 24px; font-weight: bold; color: var(--success); }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>📊 Moliyaviy Tahlil</h2>
+    <h3>📉 Moliyaviy Holat</h3>
     <canvas id="mainChart" style="max-height: 200px;"></canvas>
+    <div style="text-align: center; margin-top: 10px;">
+        <span class="profit-text" id="profitVal">0</span> <small>so'm</small>
+    </div>
 </div>
 
 <div class="card">
-    <div class="input-group">
-        <label>Umumiy tushum (so'm)</label>
-        <input type="number" id="revenue" value="10000000" oninput="updateChart()">
-    </div>
-    <div class="input-group">
-        <label>Xarajatlar (tannarx + ijara + oylik)</label>
-        <input type="number" id="expenses" value="6000000" oninput="updateChart()">
-    </div>
-    <div class="input-group">
-        <label>Soliq turi (%)</label>
-        <select id="taxRate" onchange="updateChart()">
-            <option value="4">Aylanmadan soliq (4%)</option>
-            <option value="12">QQS (12%)</option>
-            <option value="0">Soliqsiz</option>
+    <div class="input-box">
+        <label>Biznes turi</label>
+        <select id="bizType" onchange="calc()">
+            <option value="yatt">YATT (Yakka tartibdagi tadbirkor)</option>
+            <option value="mchj">MCHJ (Firma)</option>
         </select>
     </div>
-
-    <div class="result-grid">
-        <div class="res-box bg-blue">Soliq: <br><span id="taxSum">0</span></div>
-        <div class="res-box bg-green">Sof Foyda: <br><span id="netProfit">0</span></div>
+    <div class="input-box">
+        <label>Oylik tushum (so'm)</label>
+        <input type="number" id="revenue" value="20000000" oninput="calc()">
+    </div>
+    <div class="input-box">
+        <label>Operatsion xarajatlar</label>
+        <input type="number" id="expense" value="12000000" oninput="calc()">
     </div>
 </div>
 
-<div class="ai-advice" id="aiText">
-    Ma'lumotlarni kiriting, AI tahlil qilmoqda...
+<div class="ai-box">
+    <strong style="color:var(--primary)">🤖 AI Moliya Maslahatchisi:</strong>
+    <p id="aiMsg" style="font-size: 14px; line-height: 1.4; margin: 5px 0;"></p>
 </div>
 
+<div id="legalNote" class="legal-warn"></div>
+
 <script>
-    let myChart;
-    function updateChart() {
+    let chart;
+    function calc() {
         const rev = parseFloat(document.getElementById('revenue').value) || 0;
-        const exp = parseFloat(document.getElementById('expenses').value) || 0;
-        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+        const exp = parseFloat(document.getElementById('expense').value) || 0;
+        const type = document.getElementById('bizType').value;
 
-        const taxSum = rev * (taxRate / 100);
-        const netProfit = rev - exp - taxSum;
+        // O'zbekiston qonunchiligiga ko'ra taqribiy soliq
+        let taxRate = (type === 'yatt') ? 0.04 : 0.12; 
+        const tax = rev * taxRate;
+        const net = rev - exp - tax;
 
-        document.getElementById('taxSum').innerText = taxSum.toLocaleString();
-        document.getElementById('netProfit').innerText = netProfit.toLocaleString();
+        document.getElementById('profitVal').innerText = net.toLocaleString();
 
-        // AI Maslahati
-        const advice = document.getElementById('aiText');
-        if (netProfit <= 0) {
-            advice.innerHTML = "⚠️ <b>Xavf:</b> Siz zarar ko'ryapsiz! Xarajatlarni kamaytiring.";
-            advice.style.borderColor = "#e74c3c";
-        } else if (netProfit < rev * 0.1) {
-            advice.innerHTML = "💡 <b>AI Maslahati:</b> Rentabellik past. Sotuv hajmini oshirish kerak.";
-            advice.style.borderColor = "#ffca28";
+        const msg = document.getElementById('aiMsg');
+        const legal = document.getElementById('legalNote');
+
+        // AI Tahlil va Maslahat
+        if(net < 0) {
+            msg.innerText = "Siz zarar ko'ryapsiz. Xarajatlarni tahlil qilib, foydasiz xizmatlardan voz keching.";
+        } else if(rev > 100000000) {
+            msg.innerText = "Yillik tushum 1 mlrdga yaqinlashmoqda. QQS to'lovchisi bo'lishga tayyorlaning.";
         } else {
-            advice.innerHTML = "✅ <b>AI Tahlili:</b> Biznes barqaror. Soliqlarni o'z vaqtida to'lashni unutmang.";
-            advice.style.borderColor = "#2ecc71";
+            msg.innerText = "Biznesingiz barqaror. Daromadning 10% qismini zaxira jamg'armasiga yo'naltiring.";
         }
 
-        const data = [exp, taxSum, netProfit > 0 ? netProfit : 0];
-        myChart.data.datasets[0].data = data;
-        myChart.update();
+        // Qonuniy ogohlantirish (Triggerlar)
+        if(rev > 50000000 && type === 'yatt') {
+            legal.style.display = 'block';
+            legal.innerText = "⚖️ OGOHLANTIRISH: YATT sifatida tushumingiz oshmoqda. Xodimlarni rasmiy ro'yxatdan o'tkazganingizga ishonch hosil qiling, aks holda tekshiruvda jarima qo'llanilishi mumkin.";
+        } else {
+            legal.style.display = 'none';
+        }
+
+        chart.data.datasets[0].data = [exp, tax, net > 0 ? net : 0];
+        chart.update();
     }
 
     const ctx = document.getElementById('mainChart').getContext('2d');
-    myChart = new Chart(ctx, {
-        type: 'pie',
+    chart = new Chart(ctx, {
+        type: 'doughnut',
         data: {
             labels: ['Xarajat', 'Soliq', 'Sof Foyda'],
             datasets: [{
                 data: [60, 4, 36],
-                backgroundColor: ['#f39c12', '#e74c3c', '#2ecc71']
+                backgroundColor: ['#f39c12', '#e74c3c', '#2ecc71'],
+                borderWidth: 0
             }]
         },
-        options: { plugins: { legend: { position: 'bottom' } } }
+        options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
     });
 
-    updateChart();
+    calc();
     Telegram.WebApp.ready();
 </script>
-</body>
-</html>
 </body>
 </html>
