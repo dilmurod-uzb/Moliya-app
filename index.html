@@ -3,36 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moliya App</title>
+    <title>Business Finance AI</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f7f9; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        h2 { color: #333; margin-bottom: 20px; }
-        .balance { font-size: 24px; font-weight: bold; color: #2ecc71; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 15px; }
+        h2 { color: #1c1e21; font-size: 18px; margin-top: 0; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 12px; color: #65676b; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .res-box { padding: 10px; border-radius: 8px; text-align: center; color: white; }
+        .bg-green { background: #2ecc71; }
+        .bg-red { background: #e74c3c; }
+        .bg-blue { background: #3498db; }
+        .ai-advice { background: #fff3cd; border-left: 5px solid #ffca28; padding: 10px; font-size: 14px; margin-top: 15px; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Moliya Tahlili</h2>
-        <div class="balance">Balans: +200 so'm</div>
-        <canvas id="myChart"></canvas>
+
+<div class="card">
+    <h2>📊 Moliyaviy Tahlil</h2>
+    <canvas id="mainChart" style="max-height: 200px;"></canvas>
+</div>
+
+<div class="card">
+    <div class="input-group">
+        <label>Umumiy tushum (so'm)</label>
+        <input type="number" id="revenue" value="10000000" oninput="updateChart()">
     </div>
-    <script>
-        const ctx = document.getElementById('myChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Daromad', 'Xarajat'],
-                datasets: [{
-                    data: [1000, 800],
-                    backgroundColor: ['#2ecc71', '#e74c3c'],
-                    borderWidth: 0
-                }]
-            }
-        });
-        Telegram.WebApp.ready();
-    </script>
+    <div class="input-group">
+        <label>Xarajatlar (tannarx + ijara + oylik)</label>
+        <input type="number" id="expenses" value="6000000" oninput="updateChart()">
+    </div>
+    <div class="input-group">
+        <label>Soliq turi (%)</label>
+        <select id="taxRate" onchange="updateChart()">
+            <option value="4">Aylanmadan soliq (4%)</option>
+            <option value="12">QQS (12%)</option>
+            <option value="0">Soliqsiz</option>
+        </select>
+    </div>
+
+    <div class="result-grid">
+        <div class="res-box bg-blue">Soliq: <br><span id="taxSum">0</span></div>
+        <div class="res-box bg-green">Sof Foyda: <br><span id="netProfit">0</span></div>
+    </div>
+</div>
+
+<div class="ai-advice" id="aiText">
+    Ma'lumotlarni kiriting, AI tahlil qilmoqda...
+</div>
+
+<script>
+    let myChart;
+    function updateChart() {
+        const rev = parseFloat(document.getElementById('revenue').value) || 0;
+        const exp = parseFloat(document.getElementById('expenses').value) || 0;
+        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+
+        const taxSum = rev * (taxRate / 100);
+        const netProfit = rev - exp - taxSum;
+
+        document.getElementById('taxSum').innerText = taxSum.toLocaleString();
+        document.getElementById('netProfit').innerText = netProfit.toLocaleString();
+
+        // AI Maslahati
+        const advice = document.getElementById('aiText');
+        if (netProfit <= 0) {
+            advice.innerHTML = "⚠️ <b>Xavf:</b> Siz zarar ko'ryapsiz! Xarajatlarni kamaytiring.";
+            advice.style.borderColor = "#e74c3c";
+        } else if (netProfit < rev * 0.1) {
+            advice.innerHTML = "💡 <b>AI Maslahati:</b> Rentabellik past. Sotuv hajmini oshirish kerak.";
+            advice.style.borderColor = "#ffca28";
+        } else {
+            advice.innerHTML = "✅ <b>AI Tahlili:</b> Biznes barqaror. Soliqlarni o'z vaqtida to'lashni unutmang.";
+            advice.style.borderColor = "#2ecc71";
+        }
+
+        const data = [exp, taxSum, netProfit > 0 ? netProfit : 0];
+        myChart.data.datasets[0].data = data;
+        myChart.update();
+    }
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Xarajat', 'Soliq', 'Sof Foyda'],
+            datasets: [{
+                data: [60, 4, 36],
+                backgroundColor: ['#f39c12', '#e74c3c', '#2ecc71']
+            }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+
+    updateChart();
+    Telegram.WebApp.ready();
+</script>
+</body>
+</html>
 </body>
 </html>
