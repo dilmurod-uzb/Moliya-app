@@ -3,109 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buxgalter Pro Mini App</title>
+    <title>Buxgalter Pro | Analitika</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .gradient-text { background: linear-gradient(45deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        body { background: #0b0e14; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 20px; }
+        .input-style { background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; padding: 10px; margin-top: 5px; }
+        .accent-gradient { background: linear-gradient(90deg, #3fb950, #238636); }
     </style>
 </head>
 <body class="p-4">
-    <div class="text-center mb-6">
-        <h1 class="text-2xl font-bold gradient-text">FinAnalytix Pro</h1>
-        <p class="text-xs text-slate-400">Tadbirkorlik faoliyati tahlili</p>
+
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-white">Moliyaviy Tahlil</h1>
+        <p class="text-gray-400 text-sm italic">Biznesingizning real holati</p>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="glass p-3 rounded-2xl">
-            <p class="text-[10px] text-slate-400">Jami Foyda</p>
-            <p id="totalProfit" class="text-lg font-bold text-emerald-400">0 sum</p>
-        </div>
-        <div class="glass p-3 rounded-2xl">
-            <p class="text-[10px] text-slate-400">Soliq Yuklamasi</p>
-            <p id="taxLoad" class="text-lg font-bold text-rose-400">0 sum</p>
+    <div class="grid grid-cols-1 gap-4 mb-6">
+        <div class="card">
+            <h3 class="text-sm font-medium mb-2 text-gray-300">Daromad Strukturasi</h3>
+            <div id="mainChart"></div>
         </div>
     </div>
 
-    <div class="glass p-4 rounded-3xl mb-6">
-        <h3 class="text-sm font-semibold mb-4 text-slate-300 italic">Daromad va Xarajat diagrammasi</h3>
-        <canvas id="myChart" height="200"></canvas>
+    <div class="space-y-4">
+        <div class="card">
+            <h4 class="text-green-500 font-bold mb-3">📦 Sotuv va Narx</h4>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs">Sotuv soni (oylik)</label>
+                    <input type="number" id="qty" class="input-style" value="100" oninput="runAnalysis()">
+                </div>
+                <div>
+                    <label class="text-xs">Sotish narxi (so'm)</label>
+                    <input type="number" id="price" class="input-style" value="500000" oninput="runAnalysis()">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4 class="text-red-400 font-bold mb-3">📉 Xarajatlar (Oylik o'zgarmas)</h4>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs">Ijara va Oyliklar</label>
+                    <input type="number" id="fixedCosts" class="input-style" value="10000000" oninput="runAnalysis()">
+                </div>
+                <div>
+                    <label class="text-xs">Logistika + Reklama</label>
+                    <input type="number" id="varCosts" class="input-style" value="5000000" oninput="runAnalysis()">
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="glass p-5 rounded-3xl space-y-4">
-        <div>
-            <label class="text-xs text-slate-400">Umumiy Savdo (Aylanma)</label>
-            <input type="number" id="revenue" class="w-full bg-slate-800 border-none rounded-xl p-3 mt-1 focus:ring-2 focus:ring-sky-500" placeholder="0.00" oninput="updateAnalysis()">
+    <div class="mt-6 card border-t-4 border-green-500">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-gray-400">Sof Foyda (oylik):</span>
+            <span id="finalProfit" class="text-xl font-black text-white">0 so'm</span>
         </div>
-        <div>
-            <label class="text-xs text-slate-400">Xarajatlar (Tovarlar + Reklama)</label>
-            <input type="number" id="expenses" class="w-full bg-slate-800 border-none rounded-xl p-3 mt-1 focus:ring-2 focus:ring-sky-500" placeholder="0.00" oninput="updateAnalysis()">
+        <div class="w-full bg-gray-700 rounded-full h-2.5 mb-4">
+            <div id="marginBar" class="accent-gradient h-2.5 rounded-full" style="width: 0%"></div>
         </div>
-        <div>
-            <label class="text-xs text-slate-400">Soliq Tizimi</label>
-            <select id="taxSystem" class="w-full bg-slate-800 border-none rounded-xl p-3 mt-1" onchange="updateAnalysis()">
-                <option value="0.04">Aylanma soliq (4%)</option>
-                <option value="0.12">Foyda solig'i (12%)</option>
-                <option value="0.15">QQS tizimi (15%)</option>
-            </select>
-        </div>
+        <p id="statusMsg" class="text-xs text-gray-400 text-center"></p>
     </div>
 
-    <button onclick="sendReport()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-4 rounded-2xl mt-6 shadow-lg shadow-sky-500/30 transition-all">
-        Hisobotni Botga Yuborish
+    <button onclick="sendToBot()" class="w-full mt-6 accent-gradient py-4 rounded-xl font-bold text-white shadow-lg active:scale-95 transition-transform">
+        Professional Hisobotni Yuborish
     </button>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.MainButton.hide();
 
-        // Chart Initialization
-        const ctx = document.getElementById('myChart').getContext('2d');
-        let myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Sof Foyda', 'Xarajat', 'Soliq'],
-                datasets: [{
-                    data: [0, 0, 0],
-                    backgroundColor: ['#10b981', '#f43f5e', '#f59e0b'],
-                    borderWidth: 0,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } }
-            }
-        });
+        let options = {
+            chart: { type: 'bar', height: 250, toolbar: {show: false}, background: 'transparent' },
+            theme: { mode: 'dark' },
+            series: [{ name: 'Summa', data: [0, 0, 0, 0] }],
+            xaxis: { categories: ['Aylanma', 'Tannarx', 'Soliq', 'Foyda'], labels: {style: {colors: '#8b949e'}} },
+            colors: ['#58a6ff', '#f85149', '#d29922', '#3fb950'],
+            plotOptions: { bar: { borderRadius: 4, distributed: true } }
+        };
 
-        function updateAnalysis() {
-            const revenue = parseFloat(document.getElementById('revenue').value) || 0;
-            const expenses = parseFloat(document.getElementById('expenses').value) || 0;
-            const taxRate = parseFloat(document.getElementById('taxSystem').value);
+        let chart = new ApexCharts(document.querySelector("#mainChart"), options);
+        chart.render();
 
-            let tax = revenue * taxRate;
-            let profit = revenue - expenses - tax;
+        function runAnalysis() {
+            const qty = parseFloat(document.getElementById('qty').value) || 0;
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const fixed = parseFloat(document.getElementById('fixedCosts').value) || 0;
+            const variable = parseFloat(document.getElementById('varCosts').value) || 0;
 
-            if (profit < 0) profit = 0;
+            const revenue = qty * price;
+            const tax = revenue * 0.04; // Aylanma soliq 4%
+            const profit = revenue - fixed - variable - tax;
+            const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
 
-            // Update Cards
-            document.getElementById('totalProfit').innerText = profit.toLocaleString() + " sum";
-            document.getElementById('taxLoad').innerText = tax.toLocaleString() + " sum";
+            document.getElementById('finalProfit').innerText = profit.toLocaleString() + " so'm";
+            document.getElementById('marginBar').style.width = Math.min(Math.max(margin, 0), 100) + "%";
+            document.getElementById('statusMsg').innerText = `Rentabellik darajasi: ${margin.toFixed(1)}%`;
 
-            // Update Chart
-            myChart.data.datasets[0].data = [profit, expenses, tax];
-            myChart.update();
+            chart.updateSeries([{ data: [revenue, (fixed+variable), tax, profit] }]);
         }
 
-        function sendReport() {
-            const profit = document.getElementById('totalProfit').innerText;
-            const tax = document.getElementById('taxLoad').innerText;
-            const data = `📊 Hisobot:\n💰 Sof foyda: ${profit}\n💸 Soliq: ${tax}\n\nTahlil yakunlandi.`;
-            tg.sendData(data);
+        function sendToBot() {
+            const data = {
+                revenue: document.getElementById('qty').value * document.getElementById('price').value,
+                profit: document.getElementById('finalProfit').innerText,
+                status: document.getElementById('statusMsg').innerText
+            };
+            tg.sendData(JSON.stringify(data));
         }
+
+        runAnalysis();
     </script>
 </body>
-</html>
+    </html>
+    
