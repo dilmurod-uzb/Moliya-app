@@ -3,159 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buxgalter Pro | Moliya Dashboard</title>
+    <title>Biznes Hisob - Premium FinTech</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #010409; color: #c9d1d9; font-family: 'Inter', sans-serif; }
-        .glass-card { background: #0d1117; border: 1px solid #30363d; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .input-box { background: #161b22; border: 1px solid #30363d; color: white; border-radius: 12px; width: 100%; padding: 12px; font-weight: bold; }
-        .tab-btn { padding: 10px 20px; border-radius: 12px; font-weight: 600; transition: 0.3s; }
-        .tab-active { background: #238636; color: white; }
-        .tab-inactive { color: #8b949e; }
-        .margin-gradient { background: linear-gradient(90deg, #238636, #2ea043); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F2F2F7; overflow-x: hidden; }
+        .ios-card { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 2rem; }
+        .ios-card:active { transform: scale(0.95); }
+        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .gradient-green { background: linear-gradient(135deg, #34C759 0%, #248A3D 100%); }
+        .gradient-blue { background: linear-gradient(135deg, #007AFF 0%, #004085 100%); }
     </style>
 </head>
-<body class="p-4">
+<body x-data="appData()" class="antialiased text-[#1C1C1E]">
 
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-black text-white">PRO ANALYTICS</h1>
-            <p class="text-xs text-gray-500 uppercase tracking-widest">Business Intelligence v2.0</p>
+    <header class="fixed top-0 w-full z-40 glass border-b border-gray-200/50 px-6 py-4 flex justify-between items-center">
+        <h1 @click="secretTrigger()" class="text-2xl font-black tracking-tighter cursor-pointer select-none">
+            BIZNES<span class="text-blue-600">HISOB</span>
+        </h1>
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Premium</span>
         </div>
-        <div id="statusIndicator" class="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
-    </div>
+    </header>
 
-    <div class="grid grid-cols-2 gap-4 mb-6 text-center">
-        <div class="glass-card">
-            <p class="text-[10px] text-gray-400 mb-1">MARJA (%)</p>
-            <p id="marginPercent" class="text-2xl font-bold text-green-400">0%</p>
-        </div>
-        <div class="glass-card">
-            <p class="text-[10px] text-gray-400 mb-1">SOF FOYDA</p>
-            <p id="netProfit" class="text-xl font-bold text-white">0</p>
-        </div>
-    </div>
-
-    <div class="glass-card mb-6">
-        <div id="financialChart"></div>
-    </div>
-
-    <div class="space-y-4 mb-20">
-        <div class="glass-card border-l-4 border-blue-500">
-            <h4 class="text-sm font-bold mb-4 flex items-center">💰 DAROMAD</h4>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] text-gray-500">SOTUV NARXI</label>
-                    <input type="number" id="price" class="input-box" value="150000" oninput="calculateAll()">
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500">SOTUV SONI (OY)</label>
-                    <input type="number" id="qty" class="input-box" value="200" oninput="calculateAll()">
-                </div>
+    <main x-show="page === 'home'" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 scale-95" class="pt-24 pb-12 px-5 max-w-lg mx-auto">
+        
+        <div class="mb-8 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-200/50 h-40 relative">
+            <img :src="ads.header" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6">
+                <span class="text-white font-bold text-lg">Hamkorlarimiz reklamasi</span>
             </div>
         </div>
 
-        <div class="glass-card border-l-4 border-red-500">
-            <h4 class="text-sm font-bold mb-4 flex items-center">📉 XARAJATLAR</h4>
-            <div class="space-y-3">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] text-gray-500">TANNARX (BIR DONA)</label>
-                        <input type="number" id="cost" class="input-box" value="90000" oninput="calculateAll()">
+        <h2 class="text-xl font-bold mb-6 px-2 text-gray-500">Moliyaviy Asboblar</h2>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <template x-for="tool in tools">
+                <div @click="page = tool.id" class="ios-card bg-white p-6 shadow-sm flex flex-col items-center justify-center cursor-pointer border border-white">
+                    <div :class="tool.color" class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl text-white mb-4 shadow-inner" x-text="tool.icon"></div>
+                    <span class="font-bold text-center leading-tight" x-text="tool.title"></span>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <template x-for="tool in tools">
+        <div x-show="page === tool.id" 
+             x-transition:enter="transition ease-out duration-400 transform" 
+             x-transition:enter-start="translate-y-full opacity-0"
+             x-transition:enter-end="translate-y-0 opacity-100"
+             x-transition:leave="transition ease-in duration-300 transform"
+             x-transition:leave-start="translate-y-0 opacity-100"
+             x-transition:leave-end="translate-y-full opacity-0"
+             class="fixed inset-0 z-50 bg-[#F2F2F7] overflow-y-auto">
+            
+            <nav class="glass sticky top-0 px-6 py-5 flex items-center justify-between border-b border-gray-200">
+                <button @click="page = 'home'" class="flex items-center text-blue-600 font-bold">
+                    <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                    Orqaga
+                </button>
+                <span class="font-black uppercase text-xs tracking-widest text-gray-400" x-text="tool.title"></span>
+            </nav>
+
+            <div class="p-6 max-w-lg mx-auto space-y-6 pb-20">
+                <div class="bg-white rounded-[2.5rem] p-8 shadow-sm space-y-6 border border-gray-100">
+                    <template x-for="field in tool.fields">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase ml-2" x-text="field.label"></label>
+                            <input type="number" x-model="field.value" @input="calculate(tool.id)"
+                                   class="w-full bg-gray-50 p-5 rounded-2xl text-2xl font-black outline-none focus:ring-4 ring-blue-100 transition-all" placeholder="0">
+                        </div>
+                    </template>
+                </div>
+
+                <div class="gradient-blue rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-300">
+                    <span class="text-sm font-medium opacity-80" x-text="tool.resultLabel"></span>
+                    <div class="text-4xl font-black mt-2" x-text="formatCurrency(tool.result)"></div>
+                    <div class="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
+                        <span class="text-xs uppercase font-bold opacity-60">Holat:</span>
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase">Optimallashgan</span>
                     </div>
+                </div>
+
+                <div class="rounded-3xl overflow-hidden border-2 border-dashed border-gray-300 p-2">
+                    <img :src="ads.header" class="rounded-2xl w-full h-32 object-cover">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div x-show="showAdmin" class="fixed inset-0 z-[100] glass flex items-end">
+        <div @click.away="showAdmin = false" class="bg-white w-full h-[80vh] rounded-t-[3rem] shadow-2xl p-8 flex flex-col border-t border-gray-200">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 gradient-blue rounded-full flex items-center justify-center text-white font-bold text-xl">A</div>
                     <div>
-                        <label class="text-[10px] text-gray-500">OYLIK XARAJATLAR</label>
-                        <input type="number" id="fixed" class="input-box" value="5000000" oninput="calculateAll()">
+                        <h3 class="font-black text-lg">Admin Paneli</h3>
+                        <p class="text-xs text-green-500 font-bold">Tizimga ulanish faol</p>
                     </div>
                 </div>
+                <button @click="showAdmin = false" class="bg-gray-100 p-3 rounded-full text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">✕</button>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 gap-4">
-            <div class="glass-card">
-                <h4 class="text-[10px] text-gray-500 mb-2">ZARARSIZLIK NUQTASI</h4>
-                <p id="bePoint" class="text-lg font-bold">Kamida 0 ta sotish kerak</p>
-                <div class="w-full bg-gray-800 h-1.5 rounded-full mt-2">
-                    <div id="beProgress" class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div>
+            <div class="flex-1 overflow-y-auto space-y-4 px-2">
+                <div class="bg-blue-50 p-5 rounded-3xl rounded-tl-none text-blue-900 text-sm leading-relaxed border border-blue-100">
+                    Xush kelibsiz, Admin! Reklama bannerini o'zgartirish uchun URL manzilini pastga yozing. Hozirgi banner barcha sahifalarda yangilanadi.
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="fixed bottom-4 left-4 right-4">
-        <button onclick="sendDetailedReport()" class="w-full margin-gradient text-white py-4 rounded-2xl font-bold shadow-2xl active:scale-95 transition-transform flex justify-center items-center gap-2">
-            🚀 MUKAMMAL HISOBOTNI YUBORISH
-        </button>
+            <div class="mt-6 flex gap-3 bg-gray-50 p-3 rounded-[2rem] border border-gray-100 focus-within:ring-4 ring-blue-50">
+                <input type="text" x-model="ads.header" placeholder="Rasm linki (https://...)" class="flex-1 bg-transparent p-3 outline-none font-medium">
+                <button @click="showAdmin = false" class="gradient-blue px-6 py-3 rounded-2xl text-white font-bold shadow-lg active:scale-95 transition-transform">Saqlash</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        function appData() {
+            return {
+                page: 'home',
+                showAdmin: false,
+                clicks: 0,
+                ads: { header: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1074&auto=format&fit=crop' },
+                
+                secretTrigger() {
+                    this.clicks++;
+                    if(this.clicks >= 5) {
+                        this.showAdmin = true;
+                        this.clicks = 0;
+                    }
+                },
 
-        let chartOptions = {
-            series: [{ name: 'Summa', data: [0, 0, 0, 0] }],
-            chart: { type: 'bar', height: 250, toolbar: {show: false}, fontFamily: 'Inter' },
-            colors: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'],
-            plotOptions: { bar: { borderRadius: 8, distributed: true } },
-            xaxis: { categories: ['Aylanma', 'Xarajat', 'Soliq', 'Foyda'], labels: {style: {colors: '#8b949e', fontSize: '10px'}} },
-            theme: { mode: 'dark' },
-            dataLabels: { enabled: false }
-        };
+                tools: [
+                    { id: 'tax', title: 'Soliq Hisobi', icon: '📊', color: 'gradient-blue', resultLabel: 'Sizning solig\'ingiz:', result: 0, fields: [{label: 'Aylik tushum', value: ''}, {label: 'Soliq stavkasi (%)', value: 4}] },
+                    { id: 'cost', title: 'Tannarx', icon: '💰', color: 'bg-green-500', resultLabel: 'Mahsulot tannarxi:', result: 0, fields: [{label: 'Doimiy harajatlar', value: ''}, {label: 'Dona soni', value: ''}] },
+                    { id: 'pnl', title: 'Foyda va Zarar', icon: '📈', color: 'bg-purple-600', resultLabel: 'Sof foyda:', result: 0, fields: [{label: 'Umumiy daromad', value: ''}, {label: 'Umumiy harajat', value: ''}] },
+                    { id: 'payroll', title: 'Ish Haqi (Payroll)', icon: '👥', color: 'bg-orange-500', resultLabel: 'To\'lanadigan jami summa:', result: 0, fields: [{label: 'Xodimlar soni', value: ''}, {label: 'O\'rtacha oylik', value: ''}] },
+                    { id: 'roi', title: 'Investitsiya (ROI)', icon: '🚀', color: 'bg-red-500', resultLabel: 'Qaytish darajasi (%):', result: 0, fields: [{label: 'Kiritilgan sarmoya', value: ''}, {label: 'Kutilayotgan foyda', value: ''}] },
+                    { id: 'loan', title: 'Kredit/Zaym', icon: '🏦', color: 'bg-indigo-600', resultLabel: 'Oylik to\'lov:', result: 0, fields: [{label: 'Kredit miqdori', value: ''}, {label: 'Muddat (oy)', value: ''}] }
+                ],
 
-        let chart = new ApexCharts(document.querySelector("#financialChart"), chartOptions);
-        chart.render();
+                calculate(id) {
+                    const tool = this.tools.find(t => t.id === id);
+                    const v1 = parseFloat(tool.fields[0].value) || 0;
+                    const v2 = parseFloat(tool.fields[1].value) || 0;
 
-        function calculateAll() {
-            const price = parseFloat(document.getElementById('price').value) || 0;
-            const qty = parseFloat(document.getElementById('qty').value) || 0;
-            const unitCost = parseFloat(document.getElementById('cost').value) || 0;
-            const fixedCosts = parseFloat(document.getElementById('fixed').value) || 0;
+                    if(id === 'tax') this.tools[0].result = (v1 * v2) / 100;
+                    if(id === 'cost') this.tools[1].result = v2 > 0 ? v1 / v2 : 0;
+                    if(id === 'pnl') this.tools[2].result = v1 - v2;
+                    if(id === 'payroll') this.tools[3].result = v1 * v2;
+                    if(id === 'roi') this.tools[4].result = v1 > 0 ? (v2 / v1) * 100 : 0;
+                    if(id === 'loan') this.tools[5].result = v2 > 0 ? v1 / v2 : 0;
+                },
 
-            const revenue = price * qty;
-            const totalUnitCost = unitCost * qty;
-            const tax = revenue * 0.04; // 4% aylanma soliq
-            const totalExpenses = totalUnitCost + fixedCosts + tax;
-            const profit = revenue - totalExpenses;
-            
-            // Marja Hisobi
-            const margin = revenue > 0 ? ((revenue - totalUnitCost) / revenue) * 100 : 0;
-            const netMargin = revenue > 0 ? (profit / revenue) * 100 : 0;
-
-            // Zararsizlik nuqtasi (Break-even point)
-            const unitContribution = price - unitCost;
-            const breakEvenQty = unitContribution > 0 ? Math.ceil(fixedCosts / unitContribution) : 0;
-
-            // UI yangilash
-            document.getElementById('marginPercent').innerText = margin.toFixed(1) + "%";
-            document.getElementById('netProfit').innerText = profit.toLocaleString() + " so'm";
-            document.getElementById('bePoint').innerText = `Kamida ${breakEvenQty} ta sotish kerak`;
-            
-            let progress = (qty / (breakEvenQty * 2)) * 100;
-            document.getElementById('beProgress').style.width = Math.min(progress, 100) + "%";
-
-            // Diagrammani yangilash
-            chart.updateSeries([{ data: [revenue, totalUnitCost + fixedCosts, tax, profit] }]);
+                formatCurrency(val) {
+                    return new Intl.NumberFormat('uz-UZ').format(val) + " so'm";
+                }
+            }
         }
-
-        function sendDetailedReport() {
-            const profit = document.getElementById('netProfit').innerText;
-            const margin = document.getElementById('marginPercent').innerText;
-            const bep = document.getElementById('bePoint').innerText;
-            
-            const report = {
-                type: "PROFESSIONAL_ANALYSIS",
-                profit: profit,
-                margin: margin,
-                break_even: bep,
-                advice: parseFloat(margin) < 20 ? "Diqqat: Marja juda past!" : "Biznes barqaror."
-            };
-
-            tg.sendData(JSON.stringify(report));
-        }
-
-        calculateAll();
     </script>
 </body>
 </html>
