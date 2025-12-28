@@ -2,205 +2,228 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<title>Business Accounting Dashboard</title>
+<title>Professional Accounting Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
+body{
+    margin:0;
+    font-family: Inter, Arial, sans-serif;
+    background:#f3f4f6;
+    color:#111827;
 }
-nav {
-    background: #111827;
-    color: white;
-    padding: 15px;
-    display: flex;
-    gap: 20px;
+.sidebar{
+    width:240px;
+    height:100vh;
+    background:#0f172a;
+    color:white;
+    position:fixed;
+    padding:20px;
 }
-nav button {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+.sidebar h2{margin-bottom:30px;}
+.sidebar button{
+    width:100%;
+    background:none;
+    border:none;
+    color:#cbd5f5;
+    padding:12px;
+    text-align:left;
+    cursor:pointer;
 }
-nav button:hover {
-    color: #22c55e;
+.sidebar button:hover{background:#1e293b;color:white;}
+
+.main{
+    margin-left:260px;
+    padding:30px;
 }
-.page {
-    display: none;
-    padding: 30px;
+.page{display:none;}
+.active{display:block;}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
 }
-.active {
-    display: block;
+.card{
+    background:white;
+    border-radius:12px;
+    padding:20px;
 }
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+.kpi{
+    font-size:26px;
+    font-weight:700;
 }
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
-    gap: 20px;
+.green{color:#16a34a;}
+.red{color:#dc2626;}
+
+canvas{margin-top:30px;}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
 }
-input {
-    padding: 10px;
-    width: 100%;
-    margin-top: 10px;
+th,td{
+    padding:10px;
+    border-bottom:1px solid #e5e7eb;
 }
-.kpi {
-    font-size: 28px;
-    font-weight: bold;
-}
-.green { color: #16a34a; }
-.red { color: #dc2626; }
+th{text-align:left;background:#f9fafb;}
 </style>
 </head>
 
 <body>
 
-<nav>
-    <button onclick="showPage('dashboard')">Dashboard</button>
-    <button onclick="showPage('income')">Daromad</button>
-    <button onclick="showPage('expense')">Xarajat</button>
-    <button onclick="showPage('cashflow')">Cash Flow</button>
-</nav>
+<div class="sidebar">
+<h2>Accounting Pro</h2>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('income')">Income Statement</button>
+<button onclick="show('balance')">Balance Sheet</button>
+<button onclick="show('cash')">Cash Flow</button>
+</div>
+
+<div class="main">
 
 <!-- DASHBOARD -->
 <section id="dashboard" class="page active">
-<h2>📊 Business Dashboard</h2>
-
-<div class="grid">
-    <div class="card">
-        <p>Umumiy daromad</p>
-        <div id="totalIncome" class="kpi green">0</div>
-    </div>
-    <div class="card">
-        <p>Umumiy xarajat</p>
-        <div id="totalExpense" class="kpi red">0</div>
-    </div>
-    <div class="card">
-        <p>Sof foyda</p>
-        <div id="netProfit" class="kpi">0</div>
-    </div>
+<h1>Dashboard</h1>
+<div class="cards">
+<div class="card">
+<p>Total Revenue</p>
+<div id="rev" class="kpi green">0</div>
+</div>
+<div class="card">
+<p>Total Expenses</p>
+<div id="exp" class="kpi red">0</div>
+</div>
+<div class="card">
+<p>Net Profit</p>
+<div id="profit" class="kpi">0</div>
+</div>
+<div class="card">
+<p>Cash Balance</p>
+<div id="cashBal" class="kpi">0</div>
+</div>
 </div>
 
-<canvas id="profitChart"></canvas>
+<canvas id="trendChart"></canvas>
 </section>
 
-<!-- INCOME -->
+<!-- INCOME STATEMENT -->
 <section id="income" class="page">
-<h2>💰 Daromadlar</h2>
-<div class="card">
-    <label>Oylik daromad:</label>
-    <input type="number" id="incomeInput" value="5000" oninput="calculate()">
-</div>
+<h1>Income Statement</h1>
+<table>
+<tr><th>Revenue</th><td id="isRev"></td></tr>
+<tr><th>Expenses</th><td id="isExp"></td></tr>
+<tr><th>Net Profit</th><td id="isProfit"></td></tr>
+</table>
 <canvas id="incomeChart"></canvas>
 </section>
 
-<!-- EXPENSE -->
-<section id="expense" class="page">
-<h2>📉 Xarajatlar</h2>
-
-<div class="grid">
-<div class="card">
-    <label>Ish haqi</label>
-    <input type="number" id="salary" value="2000" oninput="calculate()">
-</div>
-<div class="card">
-    <label>Marketing</label>
-    <input type="number" id="marketing" value="1000" oninput="calculate()">
-</div>
-<div class="card">
-    <label>Ijara va boshqalar</label>
-    <input type="number" id="other" value="800" oninput="calculate()">
-</div>
-</div>
-
-<canvas id="expenseChart"></canvas>
+<!-- BALANCE SHEET -->
+<section id="balance" class="page">
+<h1>Balance Sheet</h1>
+<table>
+<tr><th>Assets</th><td id="assets"></td></tr>
+<tr><th>Liabilities</th><td id="liab"></td></tr>
+<tr><th>Equity</th><td id="equity"></td></tr>
+</table>
+<canvas id="balanceChart"></canvas>
 </section>
 
-<!-- CASHFLOW -->
-<section id="cashflow" class="page">
-<h2>💸 Cash Flow</h2>
+<!-- CASH FLOW -->
+<section id="cash" class="page">
+<h1>Cash Flow</h1>
 <canvas id="cashChart"></canvas>
 </section>
 
+</div>
+
 <script>
-function showPage(id){
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+// ---------------- CHART OF ACCOUNTS ----------------
+const accounts = {
+  cash: 1000,
+  revenue: 4000,
+  expense: 5000,
+  equity: 3000
+};
+
+// ---------------- TRANSACTIONS (ACCRUAL) ----------------
+const transactions = [
+  {debit:'cash', credit:'revenue', amount:12000},
+  {debit:'expense', credit:'cash', amount:4500},
+  {debit:'expense', credit:'cash', amount:2000}
+];
+
+// ---------------- LEDGER ENGINE ----------------
+function calculateLedger(){
+  let ledger = {cash:0,revenue:0,expense:0,equity:0};
+  transactions.forEach(t=>{
+    ledger[t.debit]+=t.amount;
+    ledger[t.credit]-=t.amount;
+  });
+  return ledger;
 }
 
-let incomeChart, expenseChart, profitChart, cashChart;
+const ledger = calculateLedger();
 
-function calculate(){
-    const income = +incomeInput.value;
-    const salary = +salary.value;
-    const marketing = +marketing.value;
-    const other = +other.value;
+// ---------------- FINANCIAL STATEMENTS ----------------
+const totalRevenue = ledger.revenue * -1;
+const totalExpense = ledger.expense;
+const netProfit = totalRevenue - totalExpense;
+const cashBalance = ledger.cash;
+const equity = netProfit;
 
-    const expense = salary + marketing + other;
-    const profit = income - expense;
+// ---------------- UI UPDATE ----------------
+rev.textContent = totalRevenue;
+exp.textContent = totalExpense;
+profit.textContent = netProfit;
+cashBal.textContent = cashBalance;
 
-    totalIncome.textContent = income;
-    totalExpense.textContent = expense;
-    netProfit.textContent = profit;
-    netProfit.className = profit >= 0 ? "kpi green" : "kpi red";
+isRev.textContent = totalRevenue;
+isExp.textContent = totalExpense;
+isProfit.textContent = netProfit;
 
-    incomeChart.data.datasets[0].data = [income];
-    incomeChart.update();
+assets.textContent = cashBalance;
+liab.textContent = 0;
+equity.textContent = equity;
 
-    expenseChart.data.datasets[0].data = [salary, marketing, other];
-    expenseChart.update();
-
-    profitChart.data.datasets[0].data = [income, expense, profit];
-    profitChart.update();
-
-    cashChart.data.datasets[0].data = [income, expense, profit];
-    cashChart.update();
+// ---------------- NAV ----------------
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-window.onload = () => {
-    incomeChart = new Chart(incomeChartCtx(), {
-        type: 'bar',
-        data: { labels: ['Daromad'], datasets: [{ data: [5000] }] }
-    });
+// ---------------- CHARTS ----------------
+new Chart(trendChart,{
+  type:'line',
+  data:{
+    labels:['Revenue','Expense','Profit'],
+    datasets:[{data:[totalRevenue,totalExpense,netProfit]}]
+  }
+});
 
-    expenseChart = new Chart(expenseChartCtx(), {
-        type: 'doughnut',
-        data: {
-            labels: ['Ish haqi','Marketing','Boshqa'],
-            datasets: [{ data: [2000,1000,800] }]
-        }
-    });
+new Chart(incomeChart,{
+  type:'bar',
+  data:{
+    labels:['Revenue','Expenses','Profit'],
+    datasets:[{data:[totalRevenue,totalExpense,netProfit]}]
+  }
+});
 
-    profitChart = new Chart(profitChartCtx(), {
-        type: 'bar',
-        data: {
-            labels: ['Daromad','Xarajat','Foyda'],
-            datasets: [{ data: [5000,3800,1200] }]
-        }
-    });
+new Chart(balanceChart,{
+  type:'doughnut',
+  data:{
+    labels:['Assets','Equity'],
+    datasets:[{data:[cashBalance,equity]}]
+  }
+});
 
-    cashChart = new Chart(cashChartCtx(), {
-        type: 'line',
-        data: {
-            labels: ['Kirim','Chiqim','Qoldiq'],
-            datasets: [{ data: [5000,3800,1200] }]
-        }
-    });
-
-    calculate();
-}
-
-function incomeChartCtx(){ return document.getElementById('incomeChart'); }
-function expenseChartCtx(){ return document.getElementById('expenseChart'); }
-function profitChartCtx(){ return document.getElementById('profitChart'); }
-function cashChartCtx(){ return document.getElementById('cashChart'); }
+new Chart(cashChart,{
+  type:'line',
+  data:{
+    labels:['Cash'],
+    datasets:[{data:[cashBalance]}]
+  }
+});
 </script>
 
 </body>
