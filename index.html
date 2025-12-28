@@ -1,230 +1,102 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<title>Professional Accounting Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body{
-    margin:0;
-    font-family: Inter, Arial, sans-serif;
-    background:#f3f4f6;
-    color:#111827;
-}
-.sidebar{
-    width:240px;
-    height:100vh;
-    background:#0f172a;
-    color:white;
-    position:fixed;
-    padding:20px;
-}
-.sidebar h2{margin-bottom:30px;}
-.sidebar button{
-    width:100%;
-    background:none;
-    border:none;
-    color:#cbd5f5;
-    padding:12px;
-    text-align:left;
-    cursor:pointer;
-}
-.sidebar button:hover{background:#1e293b;color:white;}
-
-.main{
-    margin-left:260px;
-    padding:30px;
-}
-.page{display:none;}
-.active{display:block;}
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-}
-.card{
-    background:white;
-    border-radius:12px;
-    padding:20px;
-}
-.kpi{
-    font-size:26px;
-    font-weight:700;
-}
-.green{color:#16a34a;}
-.red{color:#dc2626;}
-
-canvas{margin-top:30px;}
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
-th,td{
-    padding:10px;
-    border-bottom:1px solid #e5e7eb;
-}
-th{text-align:left;background:#f9fafb;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Finance Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
 </head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 flex justify-between items-center">
+            <h1 class="text-3xl font-bold border-l-4 border-blue-500 pl-4">FINANCE<span class="text-blue-500">INSIGHT</span></h1>
+            <div class="text-sm text-gray-400">Professional Tahlil Tizimi</div>
+        </header>
 
-<body>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass p-6 rounded-2xl">
+                <p class="text-gray-400 text-sm uppercase">Yalpi Tushum 💰</p>
+                <h2 id="totalRevenue" class="text-3xl font-bold text-green-400">0</h2>
+            </div>
+            <div class="glass p-6 rounded-2xl">
+                <p class="text-gray-400 text-sm uppercase">Jami Xarajatlar 📉</p>
+                <h2 id="totalExpense" class="text-3xl font-bold text-red-400">0</h2>
+            </div>
+            <div class="glass p-6 rounded-2xl">
+                <p class="text-gray-400 text-sm uppercase">Sof Foyda (EBITDA) 🧠</p>
+                <h2 id="netProfit" class="text-3xl font-bold text-blue-400">0</h2>
+            </div>
+        </div>
 
-<div class="sidebar">
-<h2>Accounting Pro</h2>
-<button onclick="show('dashboard')">Dashboard</button>
-<button onclick="show('income')">Income Statement</button>
-<button onclick="show('balance')">Balance Sheet</button>
-<button onclick="show('cash')">Cash Flow</button>
-</div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="glass p-6 rounded-2xl h-fit">
+                <h3 class="text-xl font-bold mb-4">Yangi Tranzaksiya 📝</h3>
+                <div class="space-y-4">
+                    <input type="number" id="amount" placeholder="Summa (so'm)" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500">
+                    <select id="type" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl outline-none">
+                        <option value="revenue">Daromad (+)</option>
+                        <option value="expense">Xarajat (-)</option>
+                    </select>
+                    <button onclick="addData()" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-xl font-bold transition">Kiritish</button>
+                </div>
+            </div>
 
-<div class="main">
+            <div class="lg:col-span-2 space-y-8">
+                <div class="glass p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold mb-4">Pul Oqimi Dinamikasi 📈</h3>
+                    <canvas id="mainChart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- DASHBOARD -->
-<section id="dashboard" class="page active">
-<h1>Dashboard</h1>
-<div class="cards">
-<div class="card">
-<p>Total Revenue</p>
-<div id="rev" class="kpi green">0</div>
-</div>
-<div class="card">
-<p>Total Expenses</p>
-<div id="exp" class="kpi red">0</div>
-</div>
-<div class="card">
-<p>Net Profit</p>
-<div id="profit" class="kpi">0</div>
-</div>
-<div class="card">
-<p>Cash Balance</p>
-<div id="cashBal" class="kpi">0</div>
-</div>
-</div>
+    <script>
+        let dataStore = { rev: 0, exp: 0, history: [] };
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        
+        let chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Balans',
+                    data: [],
+                    borderColor: '#3b82f6',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                }]
+            },
+            options: { scales: { y: { grid: { color: '#334155' } }, x: { grid: { display: false } } } }
+        });
 
-<canvas id="trendChart"></canvas>
-</section>
+        function addData() {
+            const amt = parseFloat(document.getElementById('amount').value);
+            const type = document.getElementById('type').value;
+            if (!amt) return;
 
-<!-- INCOME STATEMENT -->
-<section id="income" class="page">
-<h1>Income Statement</h1>
-<table>
-<tr><th>Revenue</th><td id="isRev"></td></tr>
-<tr><th>Expenses</th><td id="isExp"></td></tr>
-<tr><th>Net Profit</th><td id="isProfit"></td></tr>
-</table>
-<canvas id="incomeChart"></canvas>
-</section>
+            if (type === 'revenue') dataStore.rev += amt;
+            else dataStore.exp += amt;
 
-<!-- BALANCE SHEET -->
-<section id="balance" class="page">
-<h1>Balance Sheet</h1>
-<table>
-<tr><th>Assets</th><td id="assets"></td></tr>
-<tr><th>Liabilities</th><td id="liab"></td></tr>
-<tr><th>Equity</th><td id="equity"></td></tr>
-</table>
-<canvas id="balanceChart"></canvas>
-</section>
+            dataStore.history.push(dataStore.rev - dataStore.exp);
+            updateUI();
+        }
 
-<!-- CASH FLOW -->
-<section id="cash" class="page">
-<h1>Cash Flow</h1>
-<canvas id="cashChart"></canvas>
-</section>
-
-</div>
-
-<script>
-// ---------------- CHART OF ACCOUNTS ----------------
-const accounts = {
-  cash: 1000,
-  revenue: 4000,
-  expense: 5000,
-  equity: 3000
-};
-
-// ---------------- TRANSACTIONS (ACCRUAL) ----------------
-const transactions = [
-  {debit:'cash', credit:'revenue', amount:12000},
-  {debit:'expense', credit:'cash', amount:4500},
-  {debit:'expense', credit:'cash', amount:2000}
-];
-
-// ---------------- LEDGER ENGINE ----------------
-function calculateLedger(){
-  let ledger = {cash:0,revenue:0,expense:0,equity:0};
-  transactions.forEach(t=>{
-    ledger[t.debit]+=t.amount;
-    ledger[t.credit]-=t.amount;
-  });
-  return ledger;
-}
-
-const ledger = calculateLedger();
-
-// ---------------- FINANCIAL STATEMENTS ----------------
-const totalRevenue = ledger.revenue * -1;
-const totalExpense = ledger.expense;
-const netProfit = totalRevenue - totalExpense;
-const cashBalance = ledger.cash;
-const equity = netProfit;
-
-// ---------------- UI UPDATE ----------------
-rev.textContent = totalRevenue;
-exp.textContent = totalExpense;
-profit.textContent = netProfit;
-cashBal.textContent = cashBalance;
-
-isRev.textContent = totalRevenue;
-isExp.textContent = totalExpense;
-isProfit.textContent = netProfit;
-
-assets.textContent = cashBalance;
-liab.textContent = 0;
-equity.textContent = equity;
-
-// ---------------- NAV ----------------
-function show(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-// ---------------- CHARTS ----------------
-new Chart(trendChart,{
-  type:'line',
-  data:{
-    labels:['Revenue','Expense','Profit'],
-    datasets:[{data:[totalRevenue,totalExpense,netProfit]}]
-  }
-});
-
-new Chart(incomeChart,{
-  type:'bar',
-  data:{
-    labels:['Revenue','Expenses','Profit'],
-    datasets:[{data:[totalRevenue,totalExpense,netProfit]}]
-  }
-});
-
-new Chart(balanceChart,{
-  type:'doughnut',
-  data:{
-    labels:['Assets','Equity'],
-    datasets:[{data:[cashBalance,equity]}]
-  }
-});
-
-new Chart(cashChart,{
-  type:'line',
-  data:{
-    labels:['Cash'],
-    datasets:[{data:[cashBalance]}]
-  }
-});
-</script>
-
+        function updateUI() {
+            document.getElementById('totalRevenue').innerText = dataStore.rev.toLocaleString();
+            document.getElementById('totalExpense').innerText = dataStore.exp.toLocaleString();
+            document.getElementById('netProfit').innerText = (dataStore.rev - dataStore.exp).toLocaleString();
+            
+            chart.data.labels.push(new Date().toLocaleTimeString());
+            chart.data.datasets[0].data = dataStore.history;
+            chart.update();
+            document.getElementById('amount').value = '';
+        }
+    </script>
 </body>
 </html>
