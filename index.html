@@ -3,210 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Business Intelligence Pro</title>
+    <title>Enterprise Finance Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0A0E17; color: #FFFFFF; -webkit-tap-highlight-color: transparent; }
-        .ios-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .ios-card:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.06); }
-        .active-page { transform: translateX(0); }
-        .hidden-page { transform: translateX(100%); }
-        .stat-value { background: linear-gradient(180deg, #FFFFFF 0%, #A5A5A5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-premium { background: linear-gradient(135deg, #007AFF 0%, #004085 100%); box-shadow: 0 10px 20px rgba(0, 122, 255, 0.3); }
-        canvas { filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.5)); }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #05070A; color: #E2E8F0; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 28px; }
+        .chart-container { position: relative; height: 280px; width: 100%; }
+        .gradient-border { border: 1px solid; border-image: linear-gradient(to bottom, rgba(59,130,246,0.5), rgba(59,130,246,0)) 1; }
+        .tab-active { color: #3B82F6; border-bottom: 2px solid #3B82F6; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body x-data="app()" class="overflow-x-hidden">
+<body x-data="financeCore()" x-init="initGlobal()">
 
-    <header class="fixed top-0 w-full z-40 bg-[#0A0E17]/80 backdrop-blur-lg border-b border-white/5 px-6 py-5 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-2 h-8 bg-blue-600 rounded-full"></div>
-            <h1 class="text-xl font-black tracking-tighter">BIZNES<span class="text-blue-500 underline decoration-2">INSIGHT</span></h1>
+    <nav class="fixed top-0 w-full z-50 px-6 py-5 flex justify-between items-center bg-[#05070A]/80 backdrop-blur-xl border-b border-white/5">
+        <div class="flex items-center gap-2">
+            <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+            <h1 class="text-lg font-extrabold tracking-tighter uppercase">Analytix<span class="text-blue-500">Pro</span></h1>
         </div>
-        <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-white/5">
-            <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path></svg>
+        <div @click="view = 'admin'" class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer active:scale-90 transition">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7"></path></svg>
         </div>
-    </header>
+    </nav>
 
-    <main x-show="view === 'home'" class="pt-24 pb-32 px-5 max-w-lg mx-auto space-y-8">
+    <main x-show="view === 'home'" class="pt-28 pb-32 px-5 max-w-xl mx-auto space-y-6">
         
-        <section class="space-y-4">
-            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Global Analitika</p>
-            <div class="ios-card p-6 flex justify-between items-center">
+        <div class="glass-panel p-6 space-y-4">
+            <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-gray-400 text-xs">Jami Operatsion Foyda</p>
-                    <h2 class="text-3xl font-black stat-value mt-1">94.2%</h2>
+                    <p class="text-xs font-bold text-gray-500 uppercase">Umumiy Portfel</p>
+                    <h2 class="text-4xl font-black mt-1">92.4<span class="text-blue-500 text-lg">%</span></h2>
                 </div>
-                <div class="w-16 h-16">
-                    <canvas id="miniChartHome"></canvas>
-                </div>
+                <span class="bg-green-500/10 text-green-500 text-[10px] font-black px-2 py-1 rounded-full">+4.2%</span>
             </div>
-        </section>
+            <div class="chart-container">
+                <canvas id="mainAreaChart"></canvas>
+            </div>
+        </div>
 
-        <div class="rounded-[2rem] overflow-hidden border border-white/10 relative h-48 group">
-            <img :src="ads.current" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0A0E17] via-transparent p-6 flex flex-col justify-end">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="px-2 py-0.5 bg-blue-600 rounded text-[10px] font-bold">PROMO</span>
-                </div>
-                <h4 class="font-bold text-lg">Biznesingizni avtomatlashtiring</h4>
+        <div class="rounded-[2rem] overflow-hidden relative h-40 group border border-white/5">
+            <img :src="ads.image" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#05070A] p-6 flex flex-col justify-end">
+                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Premium Taklif</p>
+                <h3 class="text-lg font-bold leading-tight">Biznesingizni yangi bosqichga <br> olib chiqing</h3>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-            <template x-for="tool in tools">
-                <button @click="openTool(tool)" class="ios-card p-6 flex flex-col items-start text-left relative overflow-hidden">
-                    <div :class="tool.bg" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4" x-text="tool.icon"></div>
-                    <span class="font-bold text-sm block" x-text="tool.name"></span>
-                    <span class="text-[10px] text-gray-500 mt-1 font-medium" x-text="tool.desc"></span>
-                </button>
+            <template x-for="m in modules">
+                <div @click="openModule(m)" class="glass-panel p-5 cursor-pointer active:scale-95 transition-all">
+                    <div :class="m.color" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4" x-text="m.icon"></div>
+                    <h4 class="font-bold text-sm" x-text="m.name"></h4>
+                    <p class="text-[10px] text-gray-500 mt-1" x-text="m.desc"></p>
+                </div>
             </template>
         </div>
 
-        <footer class="pt-10 opacity-30 text-center">
-            <p class="text-[10px] font-medium">Barcha ma'lumotlar shifrlangan</p>
-            <div class="mt-4 px-10">
-                <input type="text" x-model="secretInput" @input="checkSecret" placeholder="..." class="w-full bg-transparent border-b border-white/10 text-center text-xs py-2 outline-none focus:border-blue-500 transition-all">
-            </div>
-        </footer>
+        <div class="py-10 text-center opacity-10">
+            <input type="text" x-model="secretCode" @input="checkSecret" placeholder="..." class="bg-transparent text-center outline-none w-full">
+        </div>
     </main>
 
-    <template x-for="tool in tools">
-        <div x-show="view === tool.id" class="fixed inset-0 z-50 bg-[#0A0E17] overflow-y-auto">
-            <nav class="p-6 flex justify-between items-center border-b border-white/5 bg-[#0A0E17]/50 backdrop-blur">
-                <button @click="view = 'home'" class="text-blue-500 font-bold flex items-center gap-2">
-                    <span>←</span> Orqaga
-                </button>
-                <span class="text-[10px] font-black uppercase tracking-widest text-gray-500" x-text="tool.name"></span>
-            </nav>
+    <template x-for="m in modules">
+        <div x-show="view === m.id" class="fixed inset-0 z-[60] bg-[#05070A] overflow-y-auto">
+            <div class="p-6 flex justify-between items-center border-b border-white/5 sticky top-0 bg-[#05070A]/90 backdrop-blur">
+                <button @click="view = 'home'" class="text-blue-500 font-bold">← Yopish</button>
+                <span class="text-[10px] font-black uppercase text-gray-500" x-text="m.name"></span>
+            </div>
 
-            <div class="p-6 max-w-lg mx-auto space-y-6">
-                <div class="ios-card p-6">
-                    <canvas :id="'chart-' + tool.id"></canvas>
+            <div class="p-6 max-w-xl mx-auto space-y-6">
+                <div class="glass-panel p-6">
+                    <div class="chart-container">
+                        <canvas :id="'chart-' + m.id"></canvas>
+                    </div>
                 </div>
 
-                <div class="ios-card p-8 space-y-6">
-                    <template x-for="field in tool.fields">
+                <div class="glass-panel p-8 space-y-6">
+                    <template x-for="f in m.fields">
                         <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider" x-text="field.label"></label>
-                            <input type="number" x-model="field.value" @input="recalc(tool.id)" 
-                                   class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-xl font-bold focus:border-blue-500 outline-none transition-all">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest" x-text="f.label"></label>
+                            <input type="number" x-model="f.value" @input="calculate(m.id)"
+                                   class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-2xl font-black focus:border-blue-500 transition-all outline-none">
                         </div>
                     </template>
                 </div>
 
-                <div class="btn-premium rounded-[2rem] p-8">
-                    <p class="text-white/60 text-xs font-bold uppercase" x-text="tool.resultName"></p>
-                    <h3 class="text-4xl font-black mt-2" x-text="format(tool.result)"></h3>
-                    <div class="mt-4 p-4 bg-black/20 rounded-2xl text-[11px] leading-relaxed" x-text="tool.insight"></div>
+                <div class="bg-blue-600 rounded-[2.5rem] p-8 shadow-2xl shadow-blue-900/40">
+                    <p class="text-white/60 text-xs font-bold uppercase" x-text="m.resLabel"></p>
+                    <h3 class="text-4xl font-black mt-2" x-text="format(m.result, m.unit)"></h3>
+                    <div class="mt-4 p-4 bg-black/20 rounded-2xl">
+                        <p class="text-xs leading-relaxed opacity-90" x-text="m.insight"></p>
+                    </div>
                 </div>
             </div>
         </div>
     </template>
 
-    <div x-show="showAdmin" class="fixed inset-0 z-[100] bg-black overflow-y-auto">
-        <div class="p-8 space-y-8">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-black italic">CONTROL CENTER</h2>
-                <button @click="showAdmin = false" class="text-red-500 font-bold">X</button>
+    <div x-show="showAdmin" class="fixed inset-0 z-[100] bg-[#05070A] overflow-y-auto">
+        <div class="p-8">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-black tracking-tighter">BOSHQARUV <span class="text-blue-500">MARKAZI</span></h2>
+                <button @click="showAdmin = false" class="bg-white/5 p-3 rounded-full">✕</button>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="ios-card p-6 border-blue-500/30">
-                    <p class="text-[10px] text-gray-500 uppercase">Tashriflar</p>
-                    <p class="text-2xl font-black text-blue-400">1,842</p>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="glass-panel p-6">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase">Tashriflar</p>
+                    <p class="text-3xl font-black text-blue-500">2.4k</p>
                 </div>
-                <div class="ios-card p-6">
-                    <p class="text-[10px] text-gray-500 uppercase">Click-through</p>
-                    <p class="text-2xl font-black text-green-400">12.4%</p>
+                <div class="glass-panel p-6">
+                    <p class="text-[10px] font-bold text-gray-500 uppercase">Reklama CTR</p>
+                    <p class="text-3xl font-black text-green-500">18%</p>
                 </div>
             </div>
 
-            <div class="ios-card p-6 space-y-4">
-                <h3 class="font-bold">Reklama Boshqaruvi</h3>
-                <input type="text" x-model="ads.current" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none" placeholder="Rasm yoki Video URL">
-                <button @click="showAdmin = false; alert('Saqlandi')" class="w-full py-4 btn-premium rounded-xl font-bold">Yangilash</button>
+            <div class="glass-panel p-8 space-y-6">
+                <h3 class="font-bold">Media Boshqaruvi</h3>
+                <input type="text" x-model="ads.image" class="w-full bg-white/5 p-4 rounded-xl border border-white/10 outline-none" placeholder="Rasm/Video URL">
+                <button @click="showAdmin = false" class="w-full py-5 bg-blue-600 rounded-2xl font-black uppercase tracking-widest shadow-xl">Yangilash</button>
             </div>
         </div>
     </div>
 
     <script>
-        function app() {
+        function financeCore() {
             return {
                 view: 'home',
                 showAdmin: false,
-                secretInput: '',
-                ads: { current: 'https://images.unsplash.com/photo-1611095773163-97bd3066a93e?q=80&w=1471&auto=format&fit=crop' },
+                secretCode: '',
+                ads: { image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1470&auto=format&fit=crop' },
                 
-                tools: [
-                    { id: 'cashflow', name: 'Cash Flow Bashorati', desc: 'Pul qachon tugashini aniqlang', icon: '📉', bg: 'bg-red-500/20 text-red-500', resultName: 'Likvidlik fondi', result: 0, insight: 'Diqqat! Operatsion xarajatlar daromaddan oshsa, 3 oydan keyin kassa razrivi yuzaga kelishi mumkin.', fields: [{label: 'Jami Kirim', value: 0}, {label: 'Jami Chiqim', value: 0}] },
-                    { id: 'ebitda', name: 'EBITDA Tahlili', desc: 'Biznesning sof sog\'lig\'i', icon: '💎', bg: 'bg-blue-500/20 text-blue-500', resultName: 'Sof Operatsion Foyda', result: 0, insight: 'EBITDA marjasi 15% dan yuqori bo\'lsa, biznesingiz investitsion jozibador hisoblanadi.', fields: [{label: 'Operatsion Daromad', value: 0}, {label: 'Amortizatsiya va Soliq', value: 0}] },
-                    { id: 'unit', name: 'Unit-Iqtisodiyot', icon: '📦', desc: '1 dona mahsulot foydasi', bg: 'bg-green-500/20 text-green-500', resultName: 'Sof Marja', result: 0, insight: 'Marketing xarajatlari (CAC) mahsulot foydasining 30% dan oshmasligi kerak.', fields: [{label: 'Sotish Narxi', value: 0}, {label: 'CAC + Logistika', value: 0}] },
-                    { id: 'breakeven', name: 'Zararsizlik Nuqtasi', icon: '🎯', desc: 'Qachon plyusga chiqasiz?', bg: 'bg-purple-500/20 text-purple-500', resultName: 'Kerakli Savdo Hajmi', result: 0, insight: 'Siz oyiga kamida shu miqdorda savdo qilsangizgina o\'zingizni qoplaysiz.', fields: [{label: 'Doimiy Xarajatlar', value: 0}, {label: 'Marjinallik (%)', value: 20}] }
+                modules: [
+                    { id: 'pnl', name: 'P&L (Foyda/Zarar)', desc: 'Haqiqiy rentabellik tahlili', icon: '📊', color: 'bg-blue-500/20 text-blue-500', resLabel: 'Sof Operatsion Foyda', result: 0, unit: 'sum', insight: 'P&L hisoboti sizning qog\'ozdagi foydangizni ko\'rsatadi. Bu kassa qoldig\'i bilan mos kelmasligi mumkin.', fields: [{label: 'Yalpi tushum', value: 0}, {label: 'Operatsion xarajatlar', value: 0}] },
+                    { id: 'cashflow', name: 'Cash Flow Bashorati', desc: 'Pul qachon tugashini ko\'ring', icon: '📉', color: 'bg-red-500/20 text-red-500', resLabel: 'Bashorat qilingan qoldiq', result: 0, unit: 'sum', insight: 'Kassoviy razrivni oldini olish uchun kelgusi to\'lovlarni jadvalga muvofiq kiritib boring.', fields: [{label: 'Kutilayotgan Kirim', value: 0}, {label: 'Zaruriy Chiqim', value: 0}] },
+                    { id: 'unit', name: 'Unit-Ekonomika', desc: '1 ta sotuvdan sof foyda', icon: '📦', color: 'bg-green-500/20 text-green-500', resLabel: 'Marginal foyda', result: 0, unit: 'sum', insight: 'Agar bir dona mahsulotdan foyda minus bo\'lsa, savdo hajmini oshirish faqat zarar keltiradi.', fields: [{label: 'Sotish Narxi', value: 0}, {label: 'Tannarx + Reklama (CAC)', value: 0}] },
+                    { id: 'roi', name: 'ROI / Investitsiya', desc: 'Sarmoyani oqlash muddati', icon: '🚀', color: 'bg-purple-500/20 text-purple-500', resLabel: 'Qaytish darajasi', result: 0, unit: 'percent', insight: 'Investitsiya o\'zini oqlash darajasi yillik 25% dan yuqori bo\'lishi ideal hisoblanadi.', fields: [{label: 'Kiritilgan kapital', value: 0}, {label: 'Yillik sof foyda', value: 0}] }
                 ],
 
                 checkSecret() {
-                    if(this.secretInput.toLowerCase() === 'admin paneli ochilsin!') {
+                    if(this.secretCode === 'admin paneli ochilsin!') {
                         this.showAdmin = true;
-                        this.secretInput = '';
+                        this.secretCode = '';
                     }
                 },
 
-                openTool(t) {
-                    this.view = t.id;
-                    this.$nextTick(() => this.initToolChart(t.id));
+                openModule(m) {
+                    this.view = m.id;
+                    this.$nextTick(() => this.initChart(m.id));
                 },
 
-                recalc(id) {
-                    let t = this.tools.find(x => x.id === id);
-                    let v1 = parseFloat(t.fields[0].value) || 0;
-                    let v2 = parseFloat(t.fields[1].value) || 0;
+                calculate(id) {
+                    let m = this.modules.find(x => x.id === id);
+                    let v1 = parseFloat(m.fields[0].value) || 0;
+                    let v2 = parseFloat(m.fields[1].value) || 0;
 
-                    if(id === 'cashflow' || id === 'ebitda' || id === 'unit') t.result = v1 - v2;
-                    if(id === 'breakeven') t.result = v2 > 0 ? (v1 / (v2/100)) : 0;
-                    
-                    this.updateToolChart(id, v1, v2);
+                    if(id === 'pnl' || id === 'cashflow' || id === 'unit') m.result = v1 - v2;
+                    if(id === 'roi') m.result = v1 > 0 ? (v2 / v1) * 100 : 0;
+
+                    this.updateChart(id, v1, v2);
                 },
 
-                format(v) {
-                    return new Intl.NumberFormat('uz-UZ').format(v) + " so'm";
+                format(v, unit) {
+                    let val = new Intl.NumberFormat('uz-UZ').format(v);
+                    return unit === 'sum' ? val + " so'm" : val + " %";
                 },
 
                 charts: {},
-                initToolChart(id) {
+                initGlobal() {
+                    setTimeout(() => {
+                        const ctx = document.getElementById('mainAreaChart');
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma'],
+                                datasets: [{
+                                    data: [40, 65, 52, 88, 70],
+                                    borderColor: '#3B82F6',
+                                    borderWidth: 4,
+                                    fill: true,
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    tension: 0.4,
+                                    pointRadius: 0
+                                }]
+                            },
+                            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } }, maintainAspectRatio: false }
+                        });
+                    }, 100);
+                },
+
+                initChart(id) {
                     const ctx = document.getElementById('chart-' + id);
                     if(!ctx) return;
                     if(this.charts[id]) this.charts[id].destroy();
 
                     this.charts[id] = new Chart(ctx, {
-                        type: 'line',
+                        type: id === 'pnl' ? 'bar' : 'line',
                         data: {
-                            labels: ['Yan', 'Feb', 'Mar', 'Apr', 'May'],
+                            labels: ['Prognoz', 'Haqiqat'],
                             datasets: [{
-                                label: 'Dinamika',
-                                data: [65, 59, 80, 81, 56],
-                                borderColor: '#3b82f6',
-                                tension: 0.4,
+                                label: 'Moliyaviy ko\'rsatkich',
+                                data: [0, 0],
+                                backgroundColor: id === 'cashflow' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                                borderColor: id === 'cashflow' ? '#EF4444' : '#3B82F6',
+                                borderWidth: 3,
                                 fill: true,
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                                tension: 0.3
                             }]
                         },
-                        options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
+                        options: { 
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { 
+                                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748B', font: { size: 10 } } },
+                                x: { grid: { display: false }, ticks: { color: '#64748B', font: { size: 10 } } }
+                            }
+                        }
                     });
                 },
 
-                updateToolChart(id, v1, v2) {
+                updateChart(id, v1, v2) {
                     if(this.charts[id]) {
-                        this.charts[id].data.datasets[0].data = [v1*0.7, v1*0.9, v1, v1-v2, v1-v2];
-                        this.charts[id].update();
+                        this.charts[id].data.datasets[0].data = [v1, v2];
+                        this.charts[id].update('none');
                     }
                 }
             }
         }
     </script>
 </body>
-    </html>
-    
+</html>
