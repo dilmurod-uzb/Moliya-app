@@ -1,29 +1,37 @@
-export function renderLineChart(ctx, labels, rev, exp) {
-  new Chart(ctx, {
+// Boshlang'ich ma'lumotlar
+let incomeData = [45000, 52000, 48000, 61000, 55000, 67000];
+const months = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun'];
+
+// 1. Asosiy Daromad Grafigi
+const ctx = document.getElementById('mainChart').getContext('2d');
+const mainChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels,
-      datasets: [
-        { label: 'Revenue', data: rev, borderColor: '#1F75FE', tension: 0.4 },
-        { label: 'Expenses', data: exp, borderColor: '#EF4444', tension: 0.4 },
-      ],
+        labels: months,
+        datasets: [{
+            label: 'Daromad ($)',
+            data: incomeData,
+            borderColor: '#1e40af',
+            backgroundColor: 'rgba(147, 197, 253, 0.5)',
+            fill: true,
+            tension: 0.4
+        }]
     },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } },
-  });
-}
+    options: { responsive: true }
+});
 
-export function renderDonutChart(ctx, categories) {
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(categories),
-      datasets: [
-        {
-          data: Object.values(categories),
-          backgroundColor: ['#1F75FE', '#10B981', '#F59E0B', '#EF4444'],
-        },
-      ],
-    },
-    options: { cutout: '60%' },
-  });
+// 2. Ma'lumot qo'shish funksiyasi
+function addData() {
+    const amount = document.getElementById('inputAmount').value;
+    if (amount) {
+        incomeData.push(Number(amount));
+        months.push('Yangi');
+        mainChart.update(); // Grafikni darrov yangilaydi
+        
+        // Umumiy summani yangilash
+        let currentTotal = Number(document.getElementById('totalIncome').innerText.replace('$', '').replace(',', ''));
+        document.getElementById('totalIncome').innerText = '$' + (currentTotal + Number(amount)).toLocaleString();
+        
+        document.getElementById('inputAmount').value = ''; // Inputni tozalash
+    }
 }
