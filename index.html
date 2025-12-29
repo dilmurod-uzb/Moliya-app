@@ -1,51 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise ERP Dashboard</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-50 flex h-screen overflow-hidden">
-    <aside class="w-64 bg-slate-900 text-white flex flex-col p-4">
-        <h1 class="text-xl font-bold border-b border-slate-700 pb-4 mb-6">AdminPro ERP</h1>
-        <nav class="space-y-2">
-            <div class="p-3 bg-blue-600 rounded-lg cursor-pointer">Dashboard</div>
-            <div class="p-3 hover:bg-slate-800 rounded-lg cursor-pointer">Sales Analysis</div>
-            <div class="p-3 hover:bg-slate-800 rounded-lg cursor-pointer">Finance</div>
-            <div class="p-3 hover:bg-slate-800 rounded-lg cursor-pointer">Production</div>
-        </nav>
-    </aside>
+<body class="bg-slate-50">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+        const { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } = Recharts;
 
-    <main class="flex-1 overflow-y-auto p-8">
-        <header class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-bold">Enterprise Overview</h2>
-            <div class="flex gap-4">
-                <input type="text" placeholder="Search..." class="border p-2 rounded-lg">
-                <div class="w-10 h-10 bg-blue-600 rounded-full"></div>
-            </div>
-        </header>
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            
+            // Sidebar menyusi (Rasm 1000012486.jpg asosida)
+            const menuItems = [
+                { id: 'dashboard', label: 'Dashboard', icon: 'home' },
+                { id: 'sales', label: 'Sales Analysis', icon: 'trending-up' },
+                { id: 'financial', label: 'Financial Reports', icon: 'dollar-sign' },
+                { id: 'production', label: 'Production Tracking', icon: 'package' },
+                { id: 'hr', label: 'HR/Staff', icon: 'users' },
+                { id: 'settings', label: 'System Settings', icon: 'settings' }
+            ];
 
-        <div class="grid grid-cols-4 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <p class="text-slate-500">Net Profit</p>
-                <h3 class="text-2xl font-bold text-emerald-600">$72,000</h3>
-            </div>
-            </div>
+            return (
+                <div class="flex h-screen overflow-hidden">
+                    {/* Sidebar */}
+                    <aside class="w-64 bg-[#1e293b] text-white p-4 flex flex-col">
+                        <h1 class="text-xl font-bold mb-8 px-2">AdminPro ERP</h1>
+                        <nav class="space-y-1">
+                            {menuItems.map(item => (
+                                <button onClick={() => setActiveTab(item.id)} 
+                                    class={`w-full flex items-center gap-3 p-3 rounded-lg transition ${activeTab === item.id ? 'bg-blue-600' : 'hover:bg-slate-800'}`}>
+                                    <i data-lucide={item.icon} class="w-5 h-5"></i>
+                                    <span>{item.label}</span>
+                                </button>
+                            ))}
+                        </nav>
+                    </aside>
 
-        <div class="grid grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <h4 class="font-bold mb-4">Revenue Trends</h4>
-                <canvas id="revenueChart"></canvas>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <h4 class="font-bold mb-4">Production Status</h4>
-                <canvas id="productionChart"></canvas>
-            </div>
-        </div>
-    </main>
+                    {/* Main Content */}
+                    <main class="flex-1 overflow-y-auto p-8">
+                        {activeTab === 'sales' && (
+                            <div class="space-y-6">
+                                <h2 class="text-2xl font-bold text-slate-800">Sales Analysis</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                        <p class="text-slate-500 text-sm">Total Revenue</p>
+                                        <h3 class="text-3xl font-bold mt-1">$328,000</h3>
+                                        <p class="text-emerald-500 text-sm mt-2 flex items-center gap-1">↑ +18.3% from last period</p>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                        <p class="text-slate-500 text-sm">Total Orders</p>
+                                        <h3 class="text-3xl font-bold mt-1">1,688</h3>
+                                        <p class="text-emerald-500 text-sm mt-2 flex items-center gap-1">↑ +12.7% from last period</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
-    <script type="module">
-        import { initializeCharts } from './charts.js';
-        window.onload = initializeCharts;
+                        {activeTab === 'financial' && (
+                            <div class="space-y-6">
+                                <h2 class="text-2xl font-bold text-slate-800">Financial Reports</h2>
+                                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center gap-10">
+                                    <div class="text-center">
+                                        <div class="relative w-32 h-32 flex items-center justify-center">
+                                            <svg class="w-full h-full transform -rotate-90">
+                                                <circle cx="64" cy="64" r="58" stroke="#f1f5f9" stroke-width="10" fill="none"/>
+                                                <circle cx="64" cy="64" r="58" stroke="#10b981" stroke-width="10" fill="none" stroke-dasharray="364.4" stroke-dashoffset="116.6" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="absolute text-2xl font-bold text-slate-800">68%</span>
+                                        </div>
+                                        <p class="mt-4 font-medium text-slate-600">Gross Profit Margin</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'settings' && (
+                            <div class="space-y-6">
+                                <h2 class="text-2xl font-bold text-slate-800">System Settings</h2>
+                                <div class="space-y-4">
+                                    {['Password Policy', 'Session Timeout', 'IP Whitelist'].map(item => (
+                                        <div class="bg-white p-5 rounded-xl border border-slate-100 flex justify-between items-center">
+                                            <div>
+                                                <p class="font-bold text-slate-800">{item}</p>
+                                                <p class="text-sm text-slate-500">Security configuration for your account.</p>
+                                            </div>
+                                            <button class="text-blue-600 font-medium hover:underline">Edit</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'dashboard' && <div class="text-xl text-slate-400">Dashboard Overview - Tanlang...</div>}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+        setTimeout(() => lucide.createIcons(), 100);
     </script>
 </body>
 </html>
