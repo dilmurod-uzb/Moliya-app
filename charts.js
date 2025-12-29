@@ -1,37 +1,35 @@
-// Boshlang'ich ma'lumotlar
-let incomeData = [45000, 52000, 48000, 61000, 55000, 67000];
-const months = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun'];
+import { mockDatabase, COLORS } from './data.js';
 
-// 1. Asosiy Daromad Grafigi
-const ctx = document.getElementById('mainChart').getContext('2d');
-const mainChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: months,
-        datasets: [{
-            label: 'Daromad ($)',
-            data: incomeData,
-            borderColor: '#1e40af',
-            backgroundColor: 'rgba(147, 197, 253, 0.5)',
-            fill: true,
-            tension: 0.4
-        }]
-    },
-    options: { responsive: true }
-});
+// Bu yerda siz yuborgan koddagi barcha murakkab grafiklar (Bar, Area, Gauge) bo'ladi
+export function initializeCharts() {
+    const ctxArea = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctxArea, {
+        type: 'line',
+        data: {
+            labels: mockDatabase.sales.map(s => s.month),
+            datasets: [{
+                label: 'Revenue',
+                data: mockDatabase.sales.map(s => s.revenue),
+                borderColor: COLORS.primary,
+                backgroundColor: 'rgba(30, 64, 175, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        }
+    });
 
-// 2. Ma'lumot qo'shish funksiyasi
-function addData() {
-    const amount = document.getElementById('inputAmount').value;
-    if (amount) {
-        incomeData.push(Number(amount));
-        months.push('Yangi');
-        mainChart.update(); // Grafikni darrov yangilaydi
-        
-        // Umumiy summani yangilash
-        let currentTotal = Number(document.getElementById('totalIncome').innerText.replace('$', '').replace(',', ''));
-        document.getElementById('totalIncome').innerText = '$' + (currentTotal + Number(amount)).toLocaleString();
-        
-        document.getElementById('inputAmount').value = ''; // Inputni tozalash
-    }
+    // Production Bar Chart
+    const ctxBar = document.getElementById('productionChart').getContext('2d');
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: mockDatabase.production.map(p => p.product),
+            datasets: [
+                { label: 'Planned', data: mockDatabase.production.map(p => p.planned), backgroundColor: '#94a3b8' },
+                { label: 'Completed', data: mockDatabase.production.map(p => p.completed), backgroundColor: COLORS.success },
+                { label: 'Rejected', data: mockDatabase.production.map(p => p.rejected), backgroundColor: COLORS.danger }
+            ]
+        }
+    });
 }
+
