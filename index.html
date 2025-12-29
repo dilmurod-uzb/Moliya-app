@@ -1,85 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FinERP - Accounting Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
-    <link rel="stylesheet" href="css/style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  </head>
-  <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moliya App - ERP Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <aside class="w-64 bg-slate-800 text-white p-6 hidden md:block">
+            <h1 class="text-2xl font-bold mb-10">AdminPro</h1>
+            <nav class="space-y-4">
+                <a href="#" class="block p-3 bg-blue-600 rounded">Dashboard</a>
+                <a href="#" class="block p-3 hover:bg-slate-700 rounded">Moliya</a>
+                <a href="#" class="block p-3 hover:bg-slate-700 rounded">Statistika</a>
+            </nav>
+        </aside>
 
-    <!-- Sidebar -->
-    <aside class="w-64 h-screen bg-white dark:bg-gray-800 px-4 py-6 border-r dark:border-gray-700 fixed">
-      <h1 class="text-2xl font-bold text-blue-600 mb-8">FinERP</h1>
-      <nav class="space-y-2">
-        <button class="nav-item" data-section="dashboard">🏦 Dashboard</button>
-        <button class="nav-item" data-section="accounting">📘 Accounting</button>
-        <button class="nav-item" data-section="analytics">📊 Analytics</button>
-        <button class="nav-item" data-section="budget">💰 Budget vs Actual</button>
-        <button class="nav-item" data-section="transactions">🧾 Transactions</button>
-        <button class="nav-item" data-section="reports">📑 Reports</button>
-        <button class="nav-item" data-section="settings">⚙️ Settings</button>
-      </nav>
-    </aside>
+        <main class="flex-1 overflow-y-auto p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Moliyaviy Hisobot</h2>
+                <div class="bg-white p-4 rounded-lg shadow-sm border">
+                    <input type="number" id="inputAmount" placeholder="Summani kiriting" class="border p-2 rounded">
+                    <button onclick="addData()" class="bg-blue-600 text-white px-4 py-2 rounded ml-2">Qo'shish</button>
+                </div>
+            </div>
 
-    <!-- Main Content -->
-    <main class="ml-64 flex-1 min-h-screen p-8 space-y-8">
-      <section id="dashboard" class="page-section">
-        <h2 class="text-2xl font-semibold mb-6">Main Dashboard</h2>
-        <div class="grid grid-cols-5 gap-5 mb-8" id="kpi-cards"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <p class="text-gray-500">Umumiy Daromad</p>
+                    <p id="totalIncome" class="text-3xl font-bold text-blue-700">$328,000</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <p class="text-gray-500">Xarajatlar</p>
+                    <p id="totalExpense" class="text-3xl font-bold text-red-600">$120,000</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex justify-center">
+                    <canvas id="gaugeChart" width="100" height="100"></canvas>
+                </div>
+            </div>
 
-        <div class="grid grid-cols-2 gap-8">
-          <div class="card">
-            <h3 class="title">Revenue vs Expenses</h3>
-            <canvas id="lineChart" height="250"></canvas>
-          </div>
-          <div class="card">
-            <h3 class="title">Expense Distribution</h3>
-            <canvas id="donutChart" height="250"></canvas>
-          </div>
-        </div>
-      </section>
-
-      <section id="accounting" class="page-section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Accounting — Income Statement</h2>
-        <table id="income-table" class="table-auto w-full bg-white dark:bg-gray-800 rounded-md shadow"></table>
-      </section>
-
-      <section id="analytics" class="page-section hidden">
-        <h2 class="text-2xl font-semibold">Finance Analytics</h2>
-        <canvas id="analyticsChart" height="250"></canvas>
-      </section>
-
-      <section id="budget" class="page-section hidden">
-        <h2 class="text-2xl font-semibold">Budget vs Actual</h2>
-        <canvas id="budgetChart" height="250"></canvas>
-      </section>
-
-      <section id="transactions" class="page-section hidden">
-        <h2 class="text-2xl font-semibold">Transactions</h2>
-        <table id="transactionsTable" class="table-auto w-full bg-white dark:bg-gray-800 rounded-md shadow"></table>
-      </section>
-
-      <section id="reports" class="page-section hidden">
-        <h2 class="text-2xl font-semibold">Reports</h2>
-        <p class="text-sm text-gray-500">Export-ready financial summaries will appear here.</p>
-      </section>
-
-      <section id="settings" class="page-section hidden">
-        <h2 class="text-2xl font-semibold">Settings</h2>
-        <div class="space-y-2">
-          <label>Currency:
-            <select class="input">
-              <option>USD</option><option>EUR</option><option>GBP</option>
-            </select>
-          </label>
-          <label>Fiscal Year Start:<input type="month" class="input" /></label>
-        </div>
-      </section>
-    </main>
-
-    <script type="module" src="js/main.js"></script>
-  </body>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h3 class="font-bold mb-4 text-gray-700">Daromad Grafigi (Oylar kesimida)</h3>
+                <canvas id="mainChart" height="100"></canvas>
+            </div>
+        </main>
+    </div>
+    <script src="charts.js"></script>
+</body>
 </html>
