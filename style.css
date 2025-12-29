@@ -1,0 +1,5 @@
+body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+#sales-form input { margin-right: 5px; }
+#sales-form button { padding: 5px 10px; }
+#kpis p { font-weight: bold; }
+canvas { background: #fff; margin-top: 20px; }
